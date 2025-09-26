@@ -16,7 +16,7 @@ public class UploadController {
 
     @PostMapping("/upload")
     public String upload(@RequestParam("file")MultipartFile file) throws Exception{
-        String bucketName = "teste-s3";
+        String bucketName = "prints-jogos";
         return s3Service.uploadFile(file, bucketName);
     }
 }

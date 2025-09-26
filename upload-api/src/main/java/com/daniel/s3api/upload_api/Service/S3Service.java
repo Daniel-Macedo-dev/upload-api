@@ -20,10 +20,10 @@ public class S3Service {
                     PutObjectRequest.builder()
                             .bucket(bucketName)
                             .key(key)
+                            .contentType(file.getContentType())
                             .build(),
                     RequestBody.fromBytes(file.getBytes())
             );
-
             return "https://" + bucketName + ".s3.sa-east-1.amazonaws.com/" + key;
 
         } catch (Exception e) {
