@@ -1,4 +1,4 @@
-package com.daniel.s3api.upload_api.Service;
+package com.daniel.s3api.upload_api.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;

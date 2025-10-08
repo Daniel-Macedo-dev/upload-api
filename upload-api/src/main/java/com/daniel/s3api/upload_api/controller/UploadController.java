@@ -1,6 +1,6 @@
-package com.daniel.s3api.upload_api.Controller;
+package com.daniel.s3api.upload_api.controller;
 
-import com.daniel.s3api.upload_api.Service.S3Service;
+import com.daniel.s3api.upload_api.service.S3Service;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
