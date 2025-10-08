@@ -14,6 +14,7 @@ public class S3Service {
 
     public String uploadFile(MultipartFile file, String bucketName) {
         try {
+
             String key = file.getOriginalFilename();
 
             s3Client.putObject(
