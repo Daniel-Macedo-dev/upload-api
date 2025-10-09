@@ -1,10 +1,7 @@
 package com.daniel.s3api.upload_api.infrastructure.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.Data;
-
 import java.time.LocalDateTime;
 
 @Table(name = "print_table")
@@ -14,9 +11,11 @@ public class Print {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String filename;
     private String game;
     private String description;
+    private String url;
     private LocalDateTime uploadDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -26,39 +25,45 @@ public class Print {
 
     public Print() {}
 
-    public Print(String filename, String game, String description, LocalDateTime uploadDate) {
+    public Print(String filename, String game, String description, String url, LocalDateTime uploadDate) {
         this.filename = filename;
         this.game = game;
         this.description = description;
+        this.url = url;
         this.uploadDate = uploadDate;
     }
 
     @PrePersist
-    public void prePersist(){
+    public void prePersist() {
         this.uploadDate = LocalDateTime.now();
     }
 
-    public Long getId() {return id;}
+    // Getters e Setters
+    public Long getId() { return id; }
 
-    public void setId(Long id) {this.id = id;}
+    public void setId(Long id) { this.id = id; }
 
-    public String getFilename() {return filename;}
+    public String getFilename() { return filename; }
 
-    public void setFilename(String filename) {this.filename = filename;}
+    public void setFilename(String filename) { this.filename = filename; }
 
-    public String getGame() {return game;}
+    public String getGame() { return game; }
 
-    public void setGame(String game) {this.game = game;}
+    public void setGame(String game) { this.game = game; }
 
-    public String getDescription() {return description;}
+    public String getDescription() { return description; }
 
-    public void setDescription(String description) {this.description = description;}
+    public void setDescription(String description) { this.description = description; }
 
-    public LocalDateTime getUploadDate() {return uploadDate;}
+    public String getUrl() { return url; }
 
-    public void setUploadDate(LocalDateTime uploadDate) {this.uploadDate = uploadDate;}
+    public void setUrl(String url) { this.url = url; }
 
-    public User getUser() {return user;}
+    public LocalDateTime getUploadDate() { return uploadDate; }
 
-    public void setUser(User user) {this.user = user;}
+    public void setUploadDate(LocalDateTime uploadDate) { this.uploadDate = uploadDate; }
+
+    public User getUser() { return user; }
+
+    public void setUser(User user) { this.user = user; }
 }
