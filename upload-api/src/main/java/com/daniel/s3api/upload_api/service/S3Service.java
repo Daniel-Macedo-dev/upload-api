@@ -27,6 +27,7 @@ public class S3Service {
             return "https://" + bucketName + ".s3.sa-east-1.amazonaws.com/" + key;
 
         } catch (Exception e) {
+
             throw new RuntimeException("Erro ao enviar arquivo para S3", e);
         }
     }
