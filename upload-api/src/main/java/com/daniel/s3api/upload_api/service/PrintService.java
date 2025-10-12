@@ -47,7 +47,6 @@ public class PrintService {
 
     public List<Print> listarPrints() {
         return printRepository.findAll();
-
     }
 
     public List<Print> listarPrintsPorUsuario(Integer userId) {
