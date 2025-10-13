@@ -23,10 +23,9 @@ public class PrintService {
         this.userRepository = userRepository;
     }
 
-    public Print salvarPrint(MultipartFile file, String game, String description, Integer userId, String bucketName) {
-
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new RuntimeException("Usuário não encontrado"));
+    public Print savePrint(MultipartFile file, String game, String description, Integer userId, String bucketName) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         String fileUrl = s3Service.uploadFile(file, bucketName);
 
@@ -36,6 +35,7 @@ public class PrintService {
         print.setDescription(description);
         print.setUrl(fileUrl);
         print.setUploadDate(LocalDateTime.now());
+        print.setUser(user);
 
         user.addPrint(print);
         userRepository.saveAndFlush(user);
@@ -43,51 +43,60 @@ public class PrintService {
         return print;
     }
 
-
-
-    public List<Print> listarPrints() {
+    public List<Print> listPrints() {
         return printRepository.findAll();
     }
 
-    public List<Print> listarPrintsPorUsuario(Integer userId) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new RuntimeException("Usuário não encontrado"));
+    public List<Print> listPrintsByUser(Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
         return user.getPrints();
     }
 
-    public Print buscarPrintPorId(Long id) {
+    public Print getPrintById(Long id) {
         return printRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Print não encontrada"));
+                .orElseThrow(() -> new RuntimeException("Print not found"));
     }
 
-    public Print substituirPrint(Long id, Print novaPrint) {
-        Print printBusca = printRepository.findById(id).orElseThrow(
-                () -> new RuntimeException("Print não encontrada"));
+    public Print updatePrint(Long id, Print newPrint, Integer userId) {
+        Print print = printRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Print not found"));
 
-        printBusca.setFilename(novaPrint.getFilename());
-        printBusca.setGame(novaPrint.getGame());
-        printBusca.setDescription(novaPrint.getDescription());
-        printBusca.setUrl(novaPrint.getUrl());
+        if (!print.getUser().getId().equals(userId)) {
+            throw new RuntimeException("Unauthorized");
+        }
 
-        return printRepository.saveAndFlush(printBusca);
+        print.setFilename(newPrint.getFilename());
+        print.setGame(newPrint.getGame());
+        print.setDescription(newPrint.getDescription());
+        print.setUrl(newPrint.getUrl());
+
+        return printRepository.saveAndFlush(print);
     }
 
-    public Print atualizarPrintDescricao(Long id, String novaDescricao) {
-        Print printBusca = printRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Print não encontrada"));
+    public Print updatePrintDescription(Long id, String newDescription, Integer userId) {
+        Print print = printRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Print not found"));
 
-        printBusca.setDescription(novaDescricao);
+        if (!print.getUser().getId().equals(userId)) {
+            throw new RuntimeException("Unauthorized");
+        }
 
-        return printRepository.saveAndFlush(printBusca);
+        print.setDescription(newDescription);
+        return printRepository.saveAndFlush(print);
     }
 
-    public void deletarPrintPorId(Long id) {
-        Print printBusca = printRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Print não encontrada"));
+    public void deletePrintById(Long id, Integer userId) {
+        Print print = printRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Print not found"));
 
-        User user = printBusca.getUser();
+        if (!print.getUser().getId().equals(userId)) {
+            throw new RuntimeException("Unauthorized");
+        }
+
+        User user = print.getUser();
         if (user != null) {
-            user.removePrint(printBusca);
+            user.removePrint(print);
             userRepository.saveAndFlush(user);
         } else {
             printRepository.deleteById(id);
