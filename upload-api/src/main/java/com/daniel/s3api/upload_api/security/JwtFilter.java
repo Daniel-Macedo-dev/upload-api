@@ -14,7 +14,7 @@ import java.nio.charset.StandardCharsets;
 
 public class JwtFilter extends OncePerRequestFilter {
 
-    private final String JWT_SECRET = "uma_senha_secreta_para_jwt";
+    private final String JWT_SECRET = "CoxinhaPrintS3";
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,

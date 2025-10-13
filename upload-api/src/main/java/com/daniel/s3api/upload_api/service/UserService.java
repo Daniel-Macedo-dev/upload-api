@@ -17,39 +17,50 @@ public class UserService {
     private final String JWT_SECRET = "CoxinhaPrintS3";
     private final long JWT_EXPIRATION = 1000 * 60 * 60 * 24;
 
-    public UserService(UserRepository userRepository) {this.userRepository = userRepository;}
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
-    public User salveUser(User user) {
+    public User saveUser(User user) {
         user.setSenha(passwordEncoder.encode(user.getSenha()));
         return userRepository.saveAndFlush(user);
     }
-    public List<User> listUsers (){
+
+    public List<User> listUsers() {
         return userRepository.findAll();
     }
-    public User searchUserById(Integer id){
-        return userRepository.findById(id).orElseThrow(
-                () -> new RuntimeException("Usuário não encontrado"));
+
+    public User searchUserById(Integer id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
-    public User updateUser (Integer id, User newUser){
-        User userSearch = userRepository.findById(id).orElseThrow(
-                () -> new RuntimeException("Usuário não encontrado"));
+
+    public User updateUser(Integer id, User newUser) {
+        User userSearch = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
         userSearch.setNome(newUser.getNome());
         userSearch.setEmail(newUser.getEmail());
         return userRepository.saveAndFlush(userSearch);
     }
-    public void deleteUser (Integer id){
+
+    public void deleteUser(Integer id) {
         userRepository.deleteById(id);
     }
 
-    public String login (String email, String senha){
-        User user = userRepository.findByEmail(email).orElseThrow(
-                () -> new RuntimeException("Usuário não encontrado"));
+    public User authenticate(String email, String senha) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (!passwordEncoder.matches(senha, user.getSenha())){
-            throw new RuntimeException("Senha incorreta");
+        if (!passwordEncoder.matches(senha, user.getSenha())) {
+            throw new RuntimeException("Incorrect password");
         }
+        return user;
+    }
+
+    public String generateToken(Integer userId) {
         return Jwts.builder()
-                .setSubject(user.getId().toString())
+                .setSubject(userId.toString())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + JWT_EXPIRATION))
                 .signWith(SignatureAlgorithm.HS256, JWT_SECRET)
