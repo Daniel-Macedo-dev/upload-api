@@ -22,7 +22,7 @@ public class UserService {
         return userRepository.findById(id).orElseThrow(
                 () -> new RuntimeException("Usuário não encontrado"));
     }
-    public User replaceUser (Integer id, User newUser){
+    public User updateUser (Integer id, User newUser){
         User userSearch = userRepository.findById(id).orElseThrow(
                 () -> new RuntimeException("Usuário não encontrado"));
         userSearch.setNome(newUser.getNome());
