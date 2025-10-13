@@ -14,6 +14,7 @@ public class User {
     private Integer id;
     private String nome;
     private String email;
+    private String senha;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
@@ -25,11 +26,13 @@ public class User {
     public User(String nome, String email) {
         this.nome = nome;
         this.email = email;
+        this.senha = senha;
     }
 
     public User(String nome, String email, List<Print> prints) {
         this.nome = nome;
         this.email = email;
+        this.senha = senha;
         this.prints = prints;
     }
 
@@ -42,6 +45,10 @@ public class User {
     public void setNome(String nome) {this.nome = nome;}
 
     public String getEmail() {return email;}
+
+    public String getSenha() {return senha;}
+
+    public void setSenha(String senha) {this.senha = senha;}
 
     public void setEmail(String email) {this.email = email;}
 
