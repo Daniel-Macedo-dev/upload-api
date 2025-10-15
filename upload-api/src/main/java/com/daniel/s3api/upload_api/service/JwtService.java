@@ -10,7 +10,7 @@ import java.util.Date;
 @Service
 public class JwtService {
 
-    private final String JWT_SECRET = "CoxinhaPrintS3";
+    private final String JWT_SECRET = "CoxinhaPrintS3SuperSecreta1234567890";
     private final long EXPIRATION = 1000 * 60 * 60 * 24;
 
     public String generateToken(Integer userId) {

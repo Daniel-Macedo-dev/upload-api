@@ -2,7 +2,6 @@ package com.daniel.s3api.upload_api.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
@@ -20,11 +19,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // desabilita CSRF
+                .csrf(csrf -> csrf.disable()) // desativa CSRF
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // stateless
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/user", "/user/login").permitAll()
-                        .anyRequest().authenticated()
+                        .requestMatchers("/user/**").permitAll() // libera todos endpoints do /user
+                        .anyRequest().authenticated() // o resto precisa de JWT
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
