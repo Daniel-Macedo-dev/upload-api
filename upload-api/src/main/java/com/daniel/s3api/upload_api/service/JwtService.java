@@ -11,11 +11,12 @@ import java.util.Date;
 public class JwtService {
 
     private final String JWT_SECRET = "CoxinhaPrintS3SuperSecreta1234567890";
-    private final long EXPIRATION = 1000 * 60 * 60 * 24;
+    private final long EXPIRATION = 1000 * 60 * 60 * 24; // 1 dia
 
     public String generateToken(Integer userId) {
         return Jwts.builder()
                 .setSubject(userId.toString())
+                .claim("userId", userId)
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
                 .signWith(Keys.hmacShaKeyFor(JWT_SECRET.getBytes(StandardCharsets.UTF_8)))
                 .compact();

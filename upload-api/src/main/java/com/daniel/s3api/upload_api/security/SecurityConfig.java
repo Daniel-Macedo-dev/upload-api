@@ -22,8 +22,8 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable()) // desativa CSRF
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // stateless
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/user/**").permitAll() // libera todos endpoints do /user
-                        .anyRequest().authenticated() // o resto precisa de JWT
+                        .requestMatchers("/user/**", "/auth/**").permitAll()
+                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
