@@ -39,20 +39,17 @@ public class JwtFilter extends OncePerRequestFilter {
             try {
                 Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
 
-                Claims claims = Jwts.p()
+                Claims claims = Jwts.parserBuilder()
                         .setSigningKey(key)
                         .build()
                         .parseClaimsJws(token)
                         .getBody();
 
-                // Pega o userId do claim
                 Integer userId = claims.get("userId", Integer.class);
 
                 if (userId != null) {
-                    // Coloca userId no request para os controllers
                     request.setAttribute("userId", userId);
 
-                    // Autenticação Spring Security
                     UsernamePasswordAuthenticationToken authToken =
                             new UsernamePasswordAuthenticationToken(
                                     userId.toString(), null, Collections.emptyList()
@@ -79,7 +76,6 @@ public class JwtFilter extends OncePerRequestFilter {
             }
         }
 
-        // Continua a requisição normalmente
         filterChain.doFilter(request, response);
     }
 }
