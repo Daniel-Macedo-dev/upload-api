@@ -29,7 +29,6 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseEntity<User> findById(@PathVariable Integer id){
         User user = userService.searchUserById(id);
-
         return ResponseEntity.ok(user);
     }
     @PatchMapping("/{id}")
