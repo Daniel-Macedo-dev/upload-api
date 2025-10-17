@@ -20,6 +20,5 @@ public class JwtService {
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
                 .signWith(Keys.hmacShaKeyFor(JWT_SECRET.getBytes(StandardCharsets.UTF_8)))
                 .compact();
-
     }
 }
