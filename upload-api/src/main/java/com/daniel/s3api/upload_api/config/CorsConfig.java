@@ -16,6 +16,7 @@ public class CorsConfig {
                 registry.addMapping("/**") // todas as rotas
                         .allowedOrigins("http://localhost:5173") // frontend
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+
                         .allowedHeaders("*");
             }
         };
