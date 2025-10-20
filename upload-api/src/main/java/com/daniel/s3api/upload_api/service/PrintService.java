@@ -23,11 +23,11 @@ public class PrintService {
         this.userRepository = userRepository;
     }
 
-    public Print savePrint(MultipartFile file, String game, String description, Integer userId, String bucketName) {
+    public Print savePrint(MultipartFile file, String game, String description, Integer userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        String fileUrl = s3Service.uploadFile(file, bucketName);
+        String fileUrl = s3Service.uploadFile(file, "prints-jogos");
 
         Print print = new Print();
         print.setFilename(file.getOriginalFilename());
@@ -58,11 +58,10 @@ public class PrintService {
                 .orElseThrow(() -> new RuntimeException("Print not found"));
     }
 
-    public Print updatePrint(Long id, Print newPrint, Integer userId) {
-        Print print = printRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Print not found"));
+    public Print updatePrint(Long id, Print newPrint, Integer userId, boolean isAdmin) {
+        Print print = getPrintById(id);
 
-        if (!print.getUser().getId().equals(userId)) {
+        if (!print.getUser().getId().equals(userId) && !isAdmin) {
             throw new RuntimeException("Unauthorized");
         }
 
@@ -74,11 +73,10 @@ public class PrintService {
         return printRepository.saveAndFlush(print);
     }
 
-    public Print updatePrintDescription(Long id, String newDescription, Integer userId) {
-        Print print = printRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Print not found"));
+    public Print updatePrintDescription(Long id, String newDescription, Integer userId, boolean isAdmin) {
+        Print print = getPrintById(id);
 
-        if (!print.getUser().getId().equals(userId)) {
+        if (!print.getUser().getId().equals(userId) && !isAdmin) {
             throw new RuntimeException("Unauthorized");
         }
 
@@ -86,11 +84,10 @@ public class PrintService {
         return printRepository.saveAndFlush(print);
     }
 
-    public void deletePrintById(Long id, Integer userId) {
-        Print print = printRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Print not found"));
+    public void deletePrintById(Long id, Integer userId, boolean isAdmin) {
+        Print print = getPrintById(id);
 
-        if (!print.getUser().getId().equals(userId)) {
+        if (!print.getUser().getId().equals(userId) && !isAdmin) {
             throw new RuntimeException("Unauthorized");
         }
 

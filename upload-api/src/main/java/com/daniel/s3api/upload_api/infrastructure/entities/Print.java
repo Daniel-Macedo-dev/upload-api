@@ -25,12 +25,11 @@ public class Print {
 
     public Print() {}
 
-    public Print(String filename, String game, String description, String url, LocalDateTime uploadDate) {
+    public Print(String filename, String game, String description, String url) {
         this.filename = filename;
         this.game = game;
         this.description = description;
         this.url = url;
-        this.uploadDate = uploadDate;
     }
 
     @PrePersist
@@ -38,32 +37,24 @@ public class Print {
         this.uploadDate = LocalDateTime.now();
     }
 
-    // Getters e Setters
     public Long getId() { return id; }
-
     public void setId(Long id) { this.id = id; }
 
     public String getFilename() { return filename; }
-
     public void setFilename(String filename) { this.filename = filename; }
 
     public String getGame() { return game; }
-
     public void setGame(String game) { this.game = game; }
 
     public String getDescription() { return description; }
-
     public void setDescription(String description) { this.description = description; }
 
     public String getUrl() { return url; }
-
     public void setUrl(String url) { this.url = url; }
 
     public LocalDateTime getUploadDate() { return uploadDate; }
-
     public void setUploadDate(LocalDateTime uploadDate) { this.uploadDate = uploadDate; }
 
     public User getUser() { return user; }
-
     public void setUser(User user) { this.user = user; }
 }

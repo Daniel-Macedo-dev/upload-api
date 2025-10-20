@@ -2,20 +2,16 @@ package com.daniel.s3api.upload_api.service;
 
 import com.daniel.s3api.upload_api.infrastructure.entities.User;
 import com.daniel.s3api.upload_api.infrastructure.repository.UserRepository;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.List;
 
 @Service
 public class UserService {
+
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-    private final String JWT_SECRET = "CoxinhaPrintS3";
-    private final long JWT_EXPIRATION = 1000 * 60 * 60 * 24;
 
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -23,6 +19,7 @@ public class UserService {
 
     public User saveUser(User user) {
         user.setSenha(passwordEncoder.encode(user.getSenha()));
+        if (user.getRole() == null) user.setRole("USER");
         return userRepository.saveAndFlush(user);
     }
 
@@ -36,9 +33,7 @@ public class UserService {
     }
 
     public User updateUser(Integer id, User newUser) {
-        User userSearch = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
+        User userSearch = searchUserById(id);
         userSearch.setNome(newUser.getNome());
         userSearch.setEmail(newUser.getEmail());
         return userRepository.saveAndFlush(userSearch);
@@ -51,19 +46,14 @@ public class UserService {
     public User authenticate(String email, String senha) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-
         if (!passwordEncoder.matches(senha, user.getSenha())) {
             throw new RuntimeException("Incorrect password");
         }
         return user;
     }
 
-    public String generateToken(Integer userId) {
-        return Jwts.builder()
-                .setSubject(userId.toString())
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + JWT_EXPIRATION))
-                .signWith(SignatureAlgorithm.HS256, JWT_SECRET)
-                .compact();
+    public boolean isAdmin(Integer userId) {
+        User user = searchUserById(userId);
+        return "ADMIN".equalsIgnoreCase(user.getRole());
     }
 }

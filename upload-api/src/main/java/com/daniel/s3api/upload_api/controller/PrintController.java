@@ -2,6 +2,7 @@ package com.daniel.s3api.upload_api.controller;
 
 import com.daniel.s3api.upload_api.infrastructure.entities.Print;
 import com.daniel.s3api.upload_api.service.PrintService;
+import com.daniel.s3api.upload_api.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,9 +16,11 @@ import java.util.List;
 public class PrintController {
 
     private final PrintService printService;
+    private final UserService userService;
 
-    public PrintController(PrintService printService) {
+    public PrintController(PrintService printService, UserService userService) {
         this.printService = printService;
+        this.userService = userService;
     }
 
     @PostMapping("/upload")
@@ -25,27 +28,41 @@ public class PrintController {
             @RequestParam("file") MultipartFile file,
             @RequestParam("game") String game,
             @RequestParam("description") String description,
-            @RequestParam("bucketName") String bucketName,
             HttpServletRequest request) {
 
         Integer userId = (Integer) request.getAttribute("userId");
-        Print newPrint = printService.savePrint(file, game, description, userId, bucketName);
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        Print newPrint = printService.savePrint(file, game, description, userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(newPrint);
     }
 
     @GetMapping
-    public ResponseEntity<List<Print>> listPrints() {
+    public ResponseEntity<List<Print>> listAllPrints() {
         return ResponseEntity.ok(printService.listPrints());
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Print>> listPrintsByUser(@PathVariable Integer userId) {
+    public ResponseEntity<List<Print>> listPrintsByUser(@PathVariable Integer userId,
+                                                        HttpServletRequest request) {
+        Integer requesterId = (Integer) request.getAttribute("userId");
+        if (!requesterId.equals(userId) && !userService.isAdmin(requesterId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         return ResponseEntity.ok(printService.listPrintsByUser(userId));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Print> getPrintById(@PathVariable Long id) {
+    public ResponseEntity<Print> getPrintById(@PathVariable Long id,
+                                              HttpServletRequest request) {
         Print print = printService.getPrintById(id);
+        Integer userId = (Integer) request.getAttribute("userId");
+
+        if (!print.getUserId().equals(userId) && !userService.isAdmin(userId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         return ResponseEntity.ok(print);
     }
 
@@ -68,7 +85,8 @@ public class PrintController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePrint(@PathVariable Long id, HttpServletRequest request) {
+    public ResponseEntity<Void> deletePrint(@PathVariable Long id,
+                                            HttpServletRequest request) {
         Integer userId = (Integer) request.getAttribute("userId");
         printService.deletePrintById(id, userId);
         return ResponseEntity.noContent().build();

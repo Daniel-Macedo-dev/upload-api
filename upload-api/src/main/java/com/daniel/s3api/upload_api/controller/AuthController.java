@@ -20,6 +20,7 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<User> signup(@RequestBody User user) {
+        user.setRole("USER");
         User created = userService.saveUser(user);
         return ResponseEntity.ok(created);
     }
