@@ -26,7 +26,7 @@ public class UploadController {
         }
 
         String bucketName = "prints-jogos";
-        String fileUrl = s3Service.uploadFile(file, bucketName, userId);
+        String fileUrl = s3Service.uploadFile(file, bucketName);
         return ResponseEntity.status(HttpStatus.CREATED).body(fileUrl);
     }
 }

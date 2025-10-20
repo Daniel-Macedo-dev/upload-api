@@ -60,7 +60,7 @@ public class PrintController {
         Print print = printService.getPrintById(id);
         Integer userId = (Integer) request.getAttribute("userId");
 
-        if (!print.getUserId().equals(userId) && !userService.isAdmin(userId)) {
+        if (!print.getUser().getId().equals(userId) && !userService.isAdmin(userId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         return ResponseEntity.ok(print);
@@ -71,7 +71,9 @@ public class PrintController {
                                              @RequestBody Print newPrint,
                                              HttpServletRequest request) {
         Integer userId = (Integer) request.getAttribute("userId");
-        Print updated = printService.updatePrint(id, newPrint, userId);
+        boolean isAdmin = userService.isAdmin(userId);
+
+        Print updated = printService.updatePrint(id, newPrint, userId, isAdmin);
         return ResponseEntity.ok(updated);
     }
 
@@ -80,7 +82,9 @@ public class PrintController {
                                                         @RequestParam String newDescription,
                                                         HttpServletRequest request) {
         Integer userId = (Integer) request.getAttribute("userId");
-        Print updated = printService.updatePrintDescription(id, newDescription, userId);
+        boolean isAdmin = userService.isAdmin(userId);
+
+        Print updated = printService.updatePrintDescription(id, newDescription, userId, isAdmin);
         return ResponseEntity.ok(updated);
     }
 
@@ -88,7 +92,9 @@ public class PrintController {
     public ResponseEntity<Void> deletePrint(@PathVariable Long id,
                                             HttpServletRequest request) {
         Integer userId = (Integer) request.getAttribute("userId");
-        printService.deletePrintById(id, userId);
+        boolean isAdmin = userService.isAdmin(userId);
+
+        printService.deletePrintById(id, userId, isAdmin);
         return ResponseEntity.noContent().build();
     }
 }
