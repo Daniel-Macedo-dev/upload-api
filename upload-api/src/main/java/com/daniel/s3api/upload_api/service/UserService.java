@@ -1,5 +1,6 @@
 package com.daniel.s3api.upload_api.service;
 
+import com.daniel.s3api.upload_api.dto.UserRequestDTO;
 import com.daniel.s3api.upload_api.dto.UserResponseDTO;
 import com.daniel.s3api.upload_api.infrastructure.entities.User;
 import com.daniel.s3api.upload_api.infrastructure.repository.UserRepository;
@@ -17,8 +18,15 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public User saveUser(User user) {
-        return userRepository.saveAndFlush(user);
+    public UserResponseDTO saveUser(UserRequestDTO dto) {
+        User user = new User();
+        user.setNome(dto.getNome());
+        user.setEmail(dto.getEmail());
+        user.setSenha(dto.getSenha());
+        user.setRole(dto.getRole() != null ? dto.getRole() : "USER");
+
+        User saved = userRepository.saveAndFlush(user);
+        return new UserResponseDTO(saved);
     }
 
     public User authenticate(String email, String senha) {
@@ -35,25 +43,27 @@ public class UserService {
     public List<UserResponseDTO> listUsers() {
         return userRepository.findAll()
                 .stream()
-                .map(UserResponseDTO::new) // agora recebe User diretamente
+                .map(UserResponseDTO::new)
                 .collect(Collectors.toList());
     }
 
-    public User searchUserById(Integer id) {
-        return userRepository.findById(id)
+    public UserResponseDTO searchUserById(Integer id) {
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+        return new UserResponseDTO(user);
     }
 
-    public User updateUser(Integer id, User newUser) {
+    public UserResponseDTO updateUser(Integer id, UserRequestDTO dto) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
-        user.setNome(newUser.getNome());
-        user.setEmail(newUser.getEmail());
-        user.setSenha(newUser.getSenha());
-        user.setRole(newUser.getRole());
+        user.setNome(dto.getNome());
+        user.setEmail(dto.getEmail());
+        user.setSenha(dto.getSenha());
+        user.setRole(dto.getRole());
 
-        return userRepository.saveAndFlush(user);
+        User updated = userRepository.saveAndFlush(user);
+        return new UserResponseDTO(updated);
     }
 
     public void deleteUser(Integer id) {
