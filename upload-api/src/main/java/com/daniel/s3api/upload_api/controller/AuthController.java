@@ -1,8 +1,10 @@
 package com.daniel.s3api.upload_api.controller;
 
+import com.daniel.s3api.upload_api.dto.UserRequestDTO;
+import com.daniel.s3api.upload_api.dto.UserResponseDTO;
 import com.daniel.s3api.upload_api.infrastructure.entities.User;
-import com.daniel.s3api.upload_api.service.UserService;
 import com.daniel.s3api.upload_api.service.JwtService;
+import com.daniel.s3api.upload_api.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,15 +21,15 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<User> signup(@RequestBody User user) {
-        user.setRole("USER");
-        User created = userService.saveUser(user);
+    public ResponseEntity<UserResponseDTO> signup(@RequestBody UserRequestDTO dto) {
+        dto.setRole("USER");
+        UserResponseDTO created = userService.saveUser(dto);
         return ResponseEntity.ok(created);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody User user) {
-        User foundUser = userService.authenticate(user.getEmail(), user.getSenha());
+    public ResponseEntity<String> login(@RequestBody UserRequestDTO dto) {
+        User foundUser = userService.authenticate(dto.getEmail(), dto.getSenha());
         String token = jwtService.generateToken(foundUser.getId());
         return ResponseEntity.ok(token);
     }

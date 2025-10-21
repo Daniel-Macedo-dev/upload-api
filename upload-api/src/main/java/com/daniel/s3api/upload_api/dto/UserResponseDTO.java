@@ -1,16 +1,18 @@
 package com.daniel.s3api.upload_api.dto;
 
+import com.daniel.s3api.upload_api.infrastructure.entities.User;
+
 public class UserResponseDTO {
     private Integer id;
     private String nome;
     private String email;
     private String role;
 
-    public UserResponseDTO(Integer id, String nome, String email, String role) {
-        this.id = id;
-        this.nome = nome;
-        this.email = email;
-        this.role = role;
+    public UserResponseDTO(User user) {
+        this.id = user.getId();
+        this.nome = user.getNome();
+        this.email = user.getEmail();
+        this.role = user.getRole();
     }
 
     public Integer getId() { return id; }
