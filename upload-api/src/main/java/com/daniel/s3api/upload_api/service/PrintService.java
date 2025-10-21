@@ -1,5 +1,6 @@
 package com.daniel.s3api.upload_api.service;
 
+import com.daniel.s3api.upload_api.dto.PrintDTO;
 import com.daniel.s3api.upload_api.infrastructure.entities.Print;
 import com.daniel.s3api.upload_api.infrastructure.entities.User;
 import com.daniel.s3api.upload_api.infrastructure.repository.PrintRepository;
@@ -9,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PrintService {
@@ -23,7 +25,7 @@ public class PrintService {
         this.userRepository = userRepository;
     }
 
-    public Print savePrint(MultipartFile file, String game, String description, Integer userId) {
+    public PrintDTO savePrint(MultipartFile file, String game, String description, Integer userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -40,52 +42,68 @@ public class PrintService {
         user.addPrint(print);
         userRepository.saveAndFlush(user);
 
-        return print;
+        return new PrintDTO(print);
     }
 
-    public List<Print> listPrints() {
-        return printRepository.findAll();
+    public List<PrintDTO> listPrints() {
+        return printRepository.findAll()
+                .stream()
+                .map(PrintDTO::new)
+                .collect(Collectors.toList());
     }
 
-    public List<Print> listPrintsByUser(Integer userId) {
+    public List<PrintDTO> listPrintsByUser(Integer userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        return user.getPrints();
+
+        return user.getPrints()
+                .stream()
+                .map(PrintDTO::new)
+                .collect(Collectors.toList());
     }
 
-    public Print getPrintById(Long id) {
-        return printRepository.findById(id)
+    public PrintDTO getPrintById(Long id, Integer requesterId) {
+        Print print = printRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Print not found"));
+
+        if (!print.getUser().getId().equals(requesterId)) {
+            throw new RuntimeException("Unauthorized");
+        }
+
+        return new PrintDTO(print);
     }
 
-    public Print updatePrint(Long id, Print newPrint, Integer userId, boolean isAdmin) {
-        Print print = getPrintById(id);
+    public PrintDTO updatePrint(Long id, PrintDTO dto, Integer userId, boolean isAdmin) {
+        Print print = printRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Print not found"));
 
         if (!print.getUser().getId().equals(userId) && !isAdmin) {
             throw new RuntimeException("Unauthorized");
         }
 
-        print.setFilename(newPrint.getFilename());
-        print.setGame(newPrint.getGame());
-        print.setDescription(newPrint.getDescription());
-        print.setUrl(newPrint.getUrl());
+        print.setGame(dto.getGame());
+        print.setDescription(dto.getDescription());
 
-        return printRepository.saveAndFlush(print);
+        Print updated = printRepository.saveAndFlush(print);
+        return new PrintDTO(updated);
     }
 
-    public Print updatePrintDescription(Long id, String newDescription, Integer userId, boolean isAdmin) {
-        Print print = getPrintById(id);
+    public PrintDTO updatePrintDescription(Long id, String newDescription, Integer userId, boolean isAdmin) {
+        Print print = printRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Print not found"));
 
         if (!print.getUser().getId().equals(userId) && !isAdmin) {
             throw new RuntimeException("Unauthorized");
         }
 
         print.setDescription(newDescription);
-        return printRepository.saveAndFlush(print);
+        Print updated = printRepository.saveAndFlush(print);
+        return new PrintDTO(updated);
     }
 
     public void deletePrintById(Long id, Integer userId, boolean isAdmin) {
-        Print print = getPrintById(id);
+        Print print = printRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Print not found"));
 
         if (!print.getUser().getId().equals(userId) && !isAdmin) {
             throw new RuntimeException("Unauthorized");
