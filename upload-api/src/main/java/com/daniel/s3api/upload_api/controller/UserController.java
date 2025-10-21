@@ -1,6 +1,7 @@
 package com.daniel.s3api.upload_api.controller;
 
-import com.daniel.s3api.upload_api.infrastructure.entities.User;
+import com.daniel.s3api.upload_api.dto.UserRequestDTO;
+import com.daniel.s3api.upload_api.dto.UserResponseDTO;
 import com.daniel.s3api.upload_api.service.JwtService;
 import com.daniel.s3api.upload_api.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,54 +24,60 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<User> save(@RequestBody User user, HttpServletRequest request) {
+    public ResponseEntity<UserResponseDTO> save(@RequestBody UserRequestDTO dto, HttpServletRequest request) {
         Integer requesterId = (Integer) request.getAttribute("userId");
         boolean isAdmin = userService.isAdmin(requesterId);
 
         if (!isAdmin) {
-            user.setRole("USER");
+            dto.setRole("USER");
         }
-        User newUser = userService.saveUser(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
+
+        UserResponseDTO saved = userService.saveUser(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @GetMapping
-    public ResponseEntity<List<User>> findAll(HttpServletRequest request){
+    public ResponseEntity<List<UserResponseDTO>> findAll(HttpServletRequest request) {
         Integer requesterId = (Integer) request.getAttribute("userId");
         if (!userService.isAdmin(requesterId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        return ResponseEntity.ok(userService.listUsers());
+
+        List<UserResponseDTO> users = userService.listUsers();
+        return ResponseEntity.ok(users);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> findById(@PathVariable Integer id, HttpServletRequest request){
+    public ResponseEntity<UserResponseDTO> findById(@PathVariable Integer id, HttpServletRequest request) {
         Integer requesterId = (Integer) request.getAttribute("userId");
         if (!requesterId.equals(id) && !userService.isAdmin(requesterId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        User user = userService.searchUserById(id);
+
+        UserResponseDTO user = userService.searchUserById(id);
         return ResponseEntity.ok(user);
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Integer id,
-                                           @RequestBody User newUser,
-                                           HttpServletRequest request){
+    public ResponseEntity<UserResponseDTO> updateUser(@PathVariable Integer id,
+                                                      @RequestBody UserRequestDTO dto,
+                                                      HttpServletRequest request) {
         Integer requesterId = (Integer) request.getAttribute("userId");
         if (!requesterId.equals(id) && !userService.isAdmin(requesterId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        User atualizado = userService.updateUser(id, newUser);
-        return ResponseEntity.ok(atualizado);
+
+        UserResponseDTO updated = userService.updateUser(id, dto);
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteById(@PathVariable Integer id, HttpServletRequest request){
+    public ResponseEntity<Void> deleteById(@PathVariable Integer id, HttpServletRequest request) {
         Integer requesterId = (Integer) request.getAttribute("userId");
         if (!requesterId.equals(id) && !userService.isAdmin(requesterId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
+
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }

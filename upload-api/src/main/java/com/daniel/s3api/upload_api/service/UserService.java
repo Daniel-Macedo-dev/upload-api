@@ -1,59 +1,66 @@
 package com.daniel.s3api.upload_api.service;
 
+import com.daniel.s3api.upload_api.dto.UserRequestDTO;
+import com.daniel.s3api.upload_api.dto.UserResponseDTO;
 import com.daniel.s3api.upload_api.infrastructure.entities.User;
 import com.daniel.s3api.upload_api.infrastructure.repository.UserRepository;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final JwtService jwtService;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, JwtService jwtService) {
         this.userRepository = userRepository;
+        this.jwtService = jwtService;
     }
 
-    public User saveUser(User user) {
-        user.setSenha(passwordEncoder.encode(user.getSenha()));
-        if (user.getRole() == null) user.setRole("USER");
-        return userRepository.saveAndFlush(user);
+    public UserResponseDTO saveUser(UserRequestDTO dto) {
+        User user = new User(dto.getNome(), dto.getEmail(), dto.getSenha(), dto.getRole());
+        User saved = userRepository.save(user);
+        return new UserResponseDTO(saved.getId(), saved.getNome(), saved.getEmail(), saved.getRole());
     }
 
-    public List<User> listUsers() {
-        return userRepository.findAll();
+    public List<UserResponseDTO> listUsers() {
+        return userRepository.findAll().stream()
+                .map(u -> new UserResponseDTO(u.getId(), u.getNome(), u.getEmail(), u.getRole()))
+                .collect(Collectors.toList());
     }
 
-    public User searchUserById(Integer id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public UserResponseDTO searchUserById(Integer id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+        return new UserResponseDTO(user.getId(), user.getNome(), user.getEmail(), user.getRole());
     }
 
-    public User updateUser(Integer id, User newUser) {
-        User userSearch = searchUserById(id);
-        userSearch.setNome(newUser.getNome());
-        userSearch.setEmail(newUser.getEmail());
-        return userRepository.saveAndFlush(userSearch);
+    public UserResponseDTO updateUser(Integer id, UserRequestDTO dto) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        if (dto.getNome() != null) user.setNome(dto.getNome());
+        if (dto.getEmail() != null) user.setEmail(dto.getEmail());
+        if (dto.getSenha() != null) user.setSenha(dto.getSenha());
+        if (dto.getRole() != null) user.setRole(dto.getRole());
+
+        User updated = userRepository.save(user);
+        return new UserResponseDTO(updated.getId(), updated.getNome(), updated.getEmail(), updated.getRole());
     }
 
     public void deleteUser(Integer id) {
+        if (!userRepository.existsById(id)) {
+            throw new RuntimeException("Usuário não encontrado");
+        }
         userRepository.deleteById(id);
     }
 
-    public User authenticate(String email, String senha) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        if (!passwordEncoder.matches(senha, user.getSenha())) {
-            throw new RuntimeException("Incorrect password");
-        }
-        return user;
-    }
-
     public boolean isAdmin(Integer userId) {
-        User user = searchUserById(userId);
-        return "ADMIN".equalsIgnoreCase(user.getRole());
+        Optional<User> user = userRepository.findById(userId);
+        return user.isPresent() && "ADMIN".equalsIgnoreCase(user.get().getRole());
     }
 }
