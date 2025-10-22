@@ -30,6 +30,7 @@ public class UserService {
     }
 
     public User authenticate(String email, String senha) {
+
         return userRepository.findByEmailAndSenha(email, senha)
                 .orElseThrow(() -> new RuntimeException("Email ou senha inválidos"));
     }
