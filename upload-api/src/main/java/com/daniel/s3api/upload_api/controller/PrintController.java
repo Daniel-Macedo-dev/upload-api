@@ -121,4 +121,16 @@ public class PrintController {
         printService.deletePrintById(id, userId, isAdmin);
         return ResponseEntity.noContent().build();
     }
+
+    @DeleteMapping("/all")
+    public ResponseEntity<Void> deleteAllPrints(HttpServletRequest request) {
+        Integer userId = (Integer) request.getAttribute("userId");
+        if (userId == null || !userService.isAdmin(userId)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        printService.deleteAllPrints(); // implementar no service
+        return ResponseEntity.noContent().build();
+    }
+
 }

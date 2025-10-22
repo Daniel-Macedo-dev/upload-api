@@ -117,4 +117,8 @@ public class PrintService {
             printRepository.deleteById(id);
         }
     }
+    public void deleteAllPrints() {
+        printRepository.deleteAll();
+    }
+
 }
