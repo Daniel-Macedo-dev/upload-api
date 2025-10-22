@@ -129,7 +129,7 @@ public class PrintController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        printService.deleteAllPrints(); // implementar no service
+        printService.deleteAllPrints();
         return ResponseEntity.noContent().build();
     }
 
