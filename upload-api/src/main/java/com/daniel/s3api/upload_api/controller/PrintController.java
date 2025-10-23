@@ -1,6 +1,6 @@
 package com.daniel.s3api.upload_api.controller;
 
-import com.daniel.s3api.upload_api.dto.PrintDTO;
+import com.daniel.s3api.upload_api.dto.PrintResponseDTO;
 import com.daniel.s3api.upload_api.service.PrintService;
 import com.daniel.s3api.upload_api.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,7 +24,7 @@ public class PrintController {
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<PrintDTO> uploadPrint(
+    public ResponseEntity<PrintResponseDTO> uploadPrint(
             @RequestParam("file") MultipartFile file,
             @RequestParam("game") String game,
             @RequestParam("description") String description,
@@ -35,17 +35,17 @@ public class PrintController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        PrintDTO newPrint = printService.savePrint(file, game, description, userId);
+        PrintResponseDTO newPrint = printService.savePrint(file, game, description, userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(newPrint);
     }
 
     @GetMapping
-    public ResponseEntity<List<PrintDTO>> listAllPrints() {
+    public ResponseEntity<List<PrintResponseDTO>> listAllPrints() {
         return ResponseEntity.ok(printService.listPrints());
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<PrintDTO>> listPrintsByUser(
+    public ResponseEntity<List<PrintResponseDTO>> listPrintsByUser(
             @PathVariable Integer userId,
             HttpServletRequest request) {
 
@@ -62,7 +62,7 @@ public class PrintController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PrintDTO> getPrintById(
+    public ResponseEntity<PrintResponseDTO> getPrintById(
             @PathVariable Long id,
             HttpServletRequest request) {
 
@@ -71,14 +71,14 @@ public class PrintController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        PrintDTO print = printService.getPrintById(id, userId);
+        PrintResponseDTO print = printService.getPrintById(id, userId);
         return ResponseEntity.ok(print);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PrintDTO> updatePrint(
+    public ResponseEntity<PrintResponseDTO> updatePrint(
             @PathVariable Long id,
-            @RequestBody PrintDTO newPrint,
+            @RequestBody PrintResponseDTO newPrint,
             HttpServletRequest request) {
 
         Integer userId = (Integer) request.getAttribute("userId");
@@ -87,12 +87,12 @@ public class PrintController {
         }
 
         boolean isAdmin = userService.isAdmin(userId);
-        PrintDTO updated = printService.updatePrint(id, newPrint, userId, isAdmin);
+        PrintResponseDTO updated = printService.updatePrint(id, newPrint, userId, isAdmin);
         return ResponseEntity.ok(updated);
     }
 
     @PatchMapping("/{id}/description")
-    public ResponseEntity<PrintDTO> updatePrintDescription(
+    public ResponseEntity<PrintResponseDTO> updatePrintDescription(
             @PathVariable Long id,
             @RequestParam String newDescription,
             HttpServletRequest request) {
@@ -103,7 +103,7 @@ public class PrintController {
         }
 
         boolean isAdmin = userService.isAdmin(userId);
-        PrintDTO updated = printService.updatePrintDescription(id, newDescription, userId, isAdmin);
+        PrintResponseDTO updated = printService.updatePrintDescription(id, newDescription, userId, isAdmin);
         return ResponseEntity.ok(updated);
     }
 
@@ -132,5 +132,4 @@ public class PrintController {
         printService.deleteAllPrints();
         return ResponseEntity.noContent().build();
     }
-
 }
