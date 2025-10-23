@@ -1,6 +1,6 @@
 package com.daniel.s3api.upload_api.service;
 
-import com.daniel.s3api.upload_api.dto.PrintDTO;
+import com.daniel.s3api.upload_api.dto.PrintResponseDTO;
 import com.daniel.s3api.upload_api.infrastructure.entities.Print;
 import com.daniel.s3api.upload_api.infrastructure.entities.User;
 import com.daniel.s3api.upload_api.infrastructure.repository.PrintRepository;
@@ -25,7 +25,19 @@ public class PrintService {
         this.userRepository = userRepository;
     }
 
-    public PrintDTO savePrint(MultipartFile file, String game, String description, Integer userId) {
+    private PrintResponseDTO toResponseDTO(Print print) {
+        PrintResponseDTO dto = new PrintResponseDTO();
+        dto.setId(print.getId());
+        dto.setFilename(print.getFilename());
+        dto.setGame(print.getGame());
+        dto.setDescription(print.getDescription());
+        dto.setUrl(print.getUrl());
+        dto.setUploadDate(print.getUploadDate());
+        dto.setUsername(print.getUser() != null ? print.getUser().getNome() : "Desconhecido");
+        return dto;
+    }
+
+    public PrintResponseDTO savePrint(MultipartFile file, String game, String description, Integer userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -42,27 +54,27 @@ public class PrintService {
         user.addPrint(print);
         userRepository.saveAndFlush(user);
 
-        return new PrintDTO(print);
+        return toResponseDTO(print);
     }
 
-    public List<PrintDTO> listPrints() {
+    public List<PrintResponseDTO> listPrints() {
         return printRepository.findAll()
                 .stream()
-                .map(PrintDTO::new)
+                .map(this::toResponseDTO)
                 .collect(Collectors.toList());
     }
 
-    public List<PrintDTO> listPrintsByUser(Integer userId) {
+    public List<PrintResponseDTO> listPrintsByUser(Integer userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         return user.getPrints()
                 .stream()
-                .map(PrintDTO::new)
+                .map(this::toResponseDTO)
                 .collect(Collectors.toList());
     }
 
-    public PrintDTO getPrintById(Long id, Integer requesterId) {
+    public PrintResponseDTO getPrintById(Long id, Integer requesterId) {
         Print print = printRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Print not found"));
 
@@ -70,10 +82,10 @@ public class PrintService {
             throw new RuntimeException("Unauthorized");
         }
 
-        return new PrintDTO(print);
+        return toResponseDTO(print);
     }
 
-    public PrintDTO updatePrint(Long id, PrintDTO dto, Integer userId, boolean isAdmin) {
+    public PrintResponseDTO updatePrint(Long id, PrintResponseDTO dto, Integer userId, boolean isAdmin) {
         Print print = printRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Print not found"));
 
@@ -85,10 +97,10 @@ public class PrintService {
         print.setDescription(dto.getDescription());
 
         Print updated = printRepository.saveAndFlush(print);
-        return new PrintDTO(updated);
+        return toResponseDTO(updated);
     }
 
-    public PrintDTO updatePrintDescription(Long id, String newDescription, Integer userId, boolean isAdmin) {
+    public PrintResponseDTO updatePrintDescription(Long id, String newDescription, Integer userId, boolean isAdmin) {
         Print print = printRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Print not found"));
 
@@ -98,7 +110,7 @@ public class PrintService {
 
         print.setDescription(newDescription);
         Print updated = printRepository.saveAndFlush(print);
-        return new PrintDTO(updated);
+        return toResponseDTO(updated);
     }
 
     public void deletePrintById(Long id, Integer userId, boolean isAdmin) {
@@ -117,8 +129,8 @@ public class PrintService {
             printRepository.deleteById(id);
         }
     }
+
     public void deleteAllPrints() {
         printRepository.deleteAll();
     }
-
 }

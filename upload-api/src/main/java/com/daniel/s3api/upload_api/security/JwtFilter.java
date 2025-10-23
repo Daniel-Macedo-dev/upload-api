@@ -31,6 +31,12 @@ public class JwtFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            response.setStatus(HttpServletResponse.SC_OK);
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
@@ -38,40 +44,35 @@ public class JwtFilter extends OncePerRequestFilter {
 
             try {
                 Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
-
                 Claims claims = Jwts.parserBuilder()
                         .setSigningKey(key)
                         .build()
                         .parseClaimsJws(token)
                         .getBody();
 
-                Integer userId = claims.get("userId", Integer.class);
+                // Tentar pegar userId como Integer ou Long
+                Integer userId;
+                Object claimUserId = claims.get("userId");
+                if (claimUserId instanceof Integer) {
+                    userId = (Integer) claimUserId;
+                } else if (claimUserId instanceof Long) {
+                    userId = ((Long) claimUserId).intValue();
+                } else {
+                    userId = null;
+                }
 
                 if (userId != null) {
                     request.setAttribute("userId", userId);
-
                     UsernamePasswordAuthenticationToken authToken =
-                            new UsernamePasswordAuthenticationToken(
-                                    userId.toString(), null, Collections.emptyList()
-                            );
+                            new UsernamePasswordAuthenticationToken(userId.toString(), null, Collections.emptyList());
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
 
             } catch (ExpiredJwtException e) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.getWriter().write("Token expirado");
-                return;
-            } catch (MalformedJwtException e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write("Token mal formado");
-                return;
-            } catch (SignatureException | InvalidKeyException e) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.getWriter().write("Assinatura inválida");
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token expirado");
                 return;
             } catch (Exception e) {
-                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                response.getWriter().write("Erro no processamento do token");
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token inválido");
                 return;
             }
         }
