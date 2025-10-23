@@ -51,6 +51,8 @@ public class PrintService {
         print.setUploadDate(LocalDateTime.now());
         print.setUser(user);
 
+        printRepository.saveAndFlush(print);
+
         user.addPrint(print);
         userRepository.saveAndFlush(user);
 
