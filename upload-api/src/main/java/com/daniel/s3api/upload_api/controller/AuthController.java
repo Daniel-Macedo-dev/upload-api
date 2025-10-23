@@ -5,6 +5,7 @@ import com.daniel.s3api.upload_api.dto.UserResponseDTO;
 import com.daniel.s3api.upload_api.infrastructure.entities.User;
 import com.daniel.s3api.upload_api.service.JwtService;
 import com.daniel.s3api.upload_api.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,4 +33,12 @@ public class AuthController {
         String token = jwtService.generateToken(foundUser.getId());
         return ResponseEntity.ok(token);
     }
+    @GetMapping("/teste-token")
+    public ResponseEntity<String> testeToken(HttpServletRequest request) {
+        Integer userId = (Integer) request.getAttribute("userId");
+        return ResponseEntity.ok("Token OK, userId = " + userId);
+    }
+
+
+
 }
