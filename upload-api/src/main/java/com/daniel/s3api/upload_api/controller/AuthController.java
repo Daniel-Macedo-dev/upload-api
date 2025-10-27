@@ -23,6 +23,9 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<UserResponseDTO> signup(@RequestBody UserRequestDTO dto) {
+        if (dto.getRole() == null) {
+            dto.setRole("USER");
+        }
         UserResponseDTO responseDTO = userService.saveUser(dto);
         return ResponseEntity.ok(responseDTO);
     }
@@ -33,6 +36,7 @@ public class AuthController {
         String token = jwtService.generateToken(foundUser.getId());
         return ResponseEntity.ok(token);
     }
+
     @GetMapping("/teste-token")
     public ResponseEntity<String> testeToken(HttpServletRequest request) {
         Integer userId = (Integer) request.getAttribute("userId");
