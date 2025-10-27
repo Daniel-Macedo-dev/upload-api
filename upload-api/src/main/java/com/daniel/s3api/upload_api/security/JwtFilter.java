@@ -50,9 +50,9 @@ public class JwtFilter extends OncePerRequestFilter {
                         .parseClaimsJws(token)
                         .getBody();
 
-                // Tentar pegar userId como Integer ou Long
-                Integer userId;
                 Object claimUserId = claims.get("userId");
+                Integer userId;
+
                 if (claimUserId instanceof Integer) {
                     userId = (Integer) claimUserId;
                 } else if (claimUserId instanceof Long) {
@@ -69,10 +69,20 @@ public class JwtFilter extends OncePerRequestFilter {
                 }
 
             } catch (ExpiredJwtException e) {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token expirado");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("Token expirado");
+                return;
+            } catch (MalformedJwtException e) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write("Token mal formado");
+                return;
+            } catch (SignatureException | InvalidKeyException e) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("Assinatura inválida");
                 return;
             } catch (Exception e) {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token inválido");
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                response.getWriter().write("Erro no processamento do token");
                 return;
             }
         }
