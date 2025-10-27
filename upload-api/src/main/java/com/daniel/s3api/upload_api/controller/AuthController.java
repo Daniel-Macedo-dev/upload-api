@@ -39,6 +39,4 @@ public class AuthController {
         return ResponseEntity.ok("Token OK, userId = " + userId);
     }
 
-
-
 }
