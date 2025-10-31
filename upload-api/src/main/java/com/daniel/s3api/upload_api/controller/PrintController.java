@@ -26,7 +26,6 @@ public class PrintController {
     @PostMapping("/upload")
     public ResponseEntity<PrintResponseDTO> uploadPrint(
             @RequestParam("file") MultipartFile file,
-
             @RequestParam("game") String game,
             @RequestParam("description") String description,
             HttpServletRequest request) {
