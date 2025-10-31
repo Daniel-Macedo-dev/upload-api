@@ -20,7 +20,6 @@ public class PrintController {
 
     public PrintController(PrintService printService, UserService userService) {
         this.printService = printService;
-
         this.userService = userService;
     }
 
