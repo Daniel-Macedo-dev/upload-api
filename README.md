@@ -1,6 +1,6 @@
 # Upload API
 
-API RESTful desenvolvida em **Java com Spring Boot** para autenticação de usuários, gerenciamento de prints e upload de arquivos para a **AWS S3**.
+API REST desenvolvida em **Java com Spring Boot** para autenticação de usuários, gerenciamento de prints e upload de arquivos para a **AWS S3**.
 O projeto segue **arquitetura em camadas**, com persistência de dados em **MySQL** e proteção de rotas com **JWT**.
 
 ---
