@@ -7,6 +7,8 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
+import java.util.UUID;
+
 @Service
 public class S3Service {
 
@@ -19,13 +21,27 @@ public class S3Service {
     }
 
     public String uploadFile(MultipartFile file, String bucketName) {
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("Arquivo não pode ser vazio");
+        }
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null || originalFilename.isBlank()) {
+            throw new IllegalArgumentException("Nome do arquivo inválido");
+        }
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new IllegalArgumentException("Apenas imagens são permitidas (jpeg, png, gif, webp, etc.)");
+        }
+
+        String safeFilename = originalFilename.replaceAll("[^a-zA-Z0-9._-]", "_");
+        String key = UUID.randomUUID() + "_" + safeFilename;
+
         try {
-            String key = file.getOriginalFilename();
             s3Client.putObject(
                     PutObjectRequest.builder()
                             .bucket(bucketName)
                             .key(key)
-                            .contentType(file.getContentType())
+                            .contentType(contentType)
                             .build(),
                     RequestBody.fromBytes(file.getBytes())
             );
