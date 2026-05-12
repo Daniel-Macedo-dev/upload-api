@@ -1,5 +1,6 @@
 package com.daniel.s3api.upload_api.controller;
 
+import com.daniel.s3api.upload_api.dto.PrintRequestDTO;
 import com.daniel.s3api.upload_api.dto.PrintResponseDTO;
 import com.daniel.s3api.upload_api.service.PrintService;
 import com.daniel.s3api.upload_api.service.UserService;
@@ -78,7 +79,7 @@ public class PrintController {
     @PutMapping("/{id}")
     public ResponseEntity<PrintResponseDTO> updatePrint(
             @PathVariable Long id,
-            @RequestBody PrintResponseDTO newPrint,
+            @RequestBody PrintRequestDTO dto,
             HttpServletRequest request) {
 
         Integer userId = (Integer) request.getAttribute("userId");
@@ -87,7 +88,7 @@ public class PrintController {
         }
 
         boolean isAdmin = userService.isAdmin(userId);
-        PrintResponseDTO updated = printService.updatePrint(id, newPrint, userId, isAdmin);
+        PrintResponseDTO updated = printService.updatePrint(id, dto, userId, isAdmin);
         return ResponseEntity.ok(updated);
     }
 
@@ -125,8 +126,11 @@ public class PrintController {
     @DeleteMapping("/all")
     public ResponseEntity<Void> deleteAllPrints(HttpServletRequest request) {
         Integer userId = (Integer) request.getAttribute("userId");
-        if (userId == null || !userService.isAdmin(userId)) {
+        if (userId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        if (!userService.isAdmin(userId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
         printService.deleteAllPrints();
