@@ -1,5 +1,6 @@
 package com.daniel.s3api.upload_api.service;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -10,9 +11,11 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 public class S3Service {
 
     private final S3Client s3Client;
+    private final String region;
 
-    public S3Service(S3Client s3Client) {
+    public S3Service(S3Client s3Client, @Value("${aws.s3.region}") String region) {
         this.s3Client = s3Client;
+        this.region = region;
     }
 
     public String uploadFile(MultipartFile file, String bucketName) {
@@ -26,7 +29,7 @@ public class S3Service {
                             .build(),
                     RequestBody.fromBytes(file.getBytes())
             );
-            return "https://" + bucketName + ".s3.sa-east-1.amazonaws.com/" + key;
+            return "https://" + bucketName + ".s3." + region + ".amazonaws.com/" + key;
         } catch (Exception e) {
             throw new RuntimeException("Erro ao enviar arquivo para S3", e);
         }
