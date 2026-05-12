@@ -26,7 +26,7 @@ public class UserController {
     @PostMapping
     public ResponseEntity<UserResponseDTO> save(@RequestBody UserRequestDTO dto, HttpServletRequest request) {
         Integer requesterId = (Integer) request.getAttribute("userId");
-        boolean isAdmin = userService.isAdmin(requesterId);
+        boolean isAdmin = requesterId != null && userService.isAdmin(requesterId);
 
         if (!isAdmin) {
             dto.setRole("USER");
