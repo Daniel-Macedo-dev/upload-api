@@ -1,9 +1,16 @@
 package com.daniel.s3api.upload_api.dto;
 
+import jakarta.validation.constraints.NotBlank;
+
 public class UserRequestDTO {
     private String nome;
+
+    @NotBlank(message = "Email é obrigatório")
     private String email;
+
+    @NotBlank(message = "Senha é obrigatória")
     private String senha;
+
     private String role;
 
     public String getNome() { return nome; }
