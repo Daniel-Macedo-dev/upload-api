@@ -1,11 +1,13 @@
 package com.daniel.s3api.upload_api.controller;
 
+import com.daniel.s3api.upload_api.dto.LoginRequestDTO;
 import com.daniel.s3api.upload_api.dto.UserRequestDTO;
 import com.daniel.s3api.upload_api.dto.UserResponseDTO;
 import com.daniel.s3api.upload_api.infrastructure.entities.User;
 import com.daniel.s3api.upload_api.service.JwtService;
 import com.daniel.s3api.upload_api.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,7 +24,7 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<UserResponseDTO> signup(@RequestBody UserRequestDTO dto) {
+    public ResponseEntity<UserResponseDTO> signup(@RequestBody @Valid UserRequestDTO dto) {
         if (dto.getRole() == null) {
             dto.setRole("USER");
         }
@@ -31,7 +33,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody UserRequestDTO dto) {
+    public ResponseEntity<String> login(@RequestBody LoginRequestDTO dto) {
         User foundUser = userService.authenticate(dto.getEmail(), dto.getSenha());
         String token = jwtService.generateToken(foundUser.getId());
         return ResponseEntity.ok(token);
@@ -42,5 +44,4 @@ public class AuthController {
         Integer userId = (Integer) request.getAttribute("userId");
         return ResponseEntity.ok("Token OK, userId = " + userId);
     }
-
 }
