@@ -27,7 +27,7 @@ class PrintServiceTest {
         printRepository = mock(PrintRepository.class);
         userRepository = mock(UserRepository.class);
         s3Service = mock(S3Service.class);
-        printService = new PrintService(s3Service, printRepository, userRepository);
+        printService = new PrintService(s3Service, printRepository, userRepository, "test-bucket");
     }
 
     @Test
