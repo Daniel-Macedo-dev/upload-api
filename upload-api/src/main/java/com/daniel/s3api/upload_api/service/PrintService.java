@@ -5,6 +5,7 @@ import com.daniel.s3api.upload_api.infrastructure.entities.Print;
 import com.daniel.s3api.upload_api.infrastructure.entities.User;
 import com.daniel.s3api.upload_api.infrastructure.repository.PrintRepository;
 import com.daniel.s3api.upload_api.infrastructure.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,11 +19,16 @@ public class PrintService {
     private final S3Service s3Service;
     private final PrintRepository printRepository;
     private final UserRepository userRepository;
+    private final String bucketName;
 
-    public PrintService(S3Service s3Service, PrintRepository printRepository, UserRepository userRepository) {
+    public PrintService(S3Service s3Service,
+                        PrintRepository printRepository,
+                        UserRepository userRepository,
+                        @Value("${aws.s3.bucket-name}") String bucketName) {
         this.s3Service = s3Service;
         this.printRepository = printRepository;
         this.userRepository = userRepository;
+        this.bucketName = bucketName;
     }
 
     private PrintResponseDTO toResponseDTO(Print print) {
@@ -41,7 +47,7 @@ public class PrintService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        String fileUrl = s3Service.uploadFile(file, "prints-jogos");
+        String fileUrl = s3Service.uploadFile(file, bucketName);
 
         Print print = new Print();
         print.setFilename(file.getOriginalFilename());
