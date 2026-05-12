@@ -1,12 +1,12 @@
 package com.daniel.s3api.upload_api.controller;
 
+import com.daniel.s3api.upload_api.dto.LoginRequestDTO;
 import com.daniel.s3api.upload_api.dto.UserRequestDTO;
 import com.daniel.s3api.upload_api.infrastructure.entities.User;
 import com.daniel.s3api.upload_api.service.JwtService;
 import com.daniel.s3api.upload_api.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.http.ResponseEntity;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -41,7 +41,7 @@ class AuthControllerTest {
 
     @Test
     void testLogin() {
-        UserRequestDTO dto = new UserRequestDTO();
+        LoginRequestDTO dto = new LoginRequestDTO();
         dto.setEmail("a@b.com");
         dto.setSenha("1234");
 
