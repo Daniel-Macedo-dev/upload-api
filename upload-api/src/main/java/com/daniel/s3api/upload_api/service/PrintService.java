@@ -1,6 +1,9 @@
 package com.daniel.s3api.upload_api.service;
 
+import com.daniel.s3api.upload_api.dto.PrintRequestDTO;
 import com.daniel.s3api.upload_api.dto.PrintResponseDTO;
+import com.daniel.s3api.upload_api.exception.ForbiddenException;
+import com.daniel.s3api.upload_api.exception.ResourceNotFoundException;
 import com.daniel.s3api.upload_api.infrastructure.entities.Print;
 import com.daniel.s3api.upload_api.infrastructure.entities.User;
 import com.daniel.s3api.upload_api.infrastructure.repository.PrintRepository;
@@ -45,7 +48,7 @@ public class PrintService {
 
     public PrintResponseDTO savePrint(MultipartFile file, String game, String description, Integer userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
 
         String fileUrl = s3Service.uploadFile(file, bucketName);
 
@@ -74,7 +77,7 @@ public class PrintService {
 
     public List<PrintResponseDTO> listPrintsByUser(Integer userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
 
         return user.getPrints()
                 .stream()
@@ -84,21 +87,21 @@ public class PrintService {
 
     public PrintResponseDTO getPrintById(Long id, Integer requesterId) {
         Print print = printRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Print not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Print não encontrado"));
 
         if (!print.getUser().getId().equals(requesterId)) {
-            throw new RuntimeException("Unauthorized");
+            throw new ForbiddenException("Você não tem permissão para acessar este print");
         }
 
         return toResponseDTO(print);
     }
 
-    public PrintResponseDTO updatePrint(Long id, PrintResponseDTO dto, Integer userId, boolean isAdmin) {
+    public PrintResponseDTO updatePrint(Long id, PrintRequestDTO dto, Integer userId, boolean isAdmin) {
         Print print = printRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Print not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Print não encontrado"));
 
         if (!print.getUser().getId().equals(userId) && !isAdmin) {
-            throw new RuntimeException("Unauthorized");
+            throw new ForbiddenException("Você não tem permissão para editar este print");
         }
 
         print.setGame(dto.getGame());
@@ -110,10 +113,10 @@ public class PrintService {
 
     public PrintResponseDTO updatePrintDescription(Long id, String newDescription, Integer userId, boolean isAdmin) {
         Print print = printRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Print not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Print não encontrado"));
 
         if (!print.getUser().getId().equals(userId) && !isAdmin) {
-            throw new RuntimeException("Unauthorized");
+            throw new ForbiddenException("Você não tem permissão para editar este print");
         }
 
         print.setDescription(newDescription);
@@ -123,10 +126,10 @@ public class PrintService {
 
     public void deletePrintById(Long id, Integer userId, boolean isAdmin) {
         Print print = printRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Print not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Print não encontrado"));
 
         if (!print.getUser().getId().equals(userId) && !isAdmin) {
-            throw new RuntimeException("Unauthorized");
+            throw new ForbiddenException("Você não tem permissão para deletar este print");
         }
 
         User user = print.getUser();
